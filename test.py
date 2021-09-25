@@ -19,7 +19,6 @@ class TestPrivateMethods(unittest.TestCase):
         r = api._get_all_data()
         self.assertEqual(len(r['videos']), 61) # 61 videos
         self.assertEqual(r['videos'][0]['video_name'], 'yui_aragaki_compilation-Scene-155') # first one
-        self.assertEqual(r['videos'][0]['physical_path'], '/media/yui_aragaki_compilation-Scene-155.mp4')
         self.assertEqual(r['videos'][0]['video_path'], '/media/yui_aragaki_compilation-Scene-155.mp4')
         self.assertEqual(r['videos'][0]['thumb_path'], '/media/.thumb/yui_aragaki_compilation-Scene-155.png')
 

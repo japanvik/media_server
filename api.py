@@ -36,7 +36,6 @@ def _get_all_data():
 
     for a in all_vids:
         d = {
-            'physical_path': a[0],
             'video_name': a[0].split('/')[-1].replace('.mp4', ''),
             'video_path': a[0],
             'thumb_path': _thumb_path(a[0]),
