@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <title>Videos</title>
+</head>
+<body>
+  <h1>Videos</h1>
+  <div>
+      <a href="/refresh_all_thumbs">Refresh all</a>
+  </div>
+
+  <table>
+{% for d in data['videos'] %}
+<tr>
+    <td>
+        <a href="{{d.video_path}}">
+            <img src="{{d.thumb_path}}" />
+        </a>
+    </td>
+    <td>
+        <a href="{{d.video_path}}">
+            {{d.video_name}}
+        </a> <br />
+        <span> {{d.created_time}} </span>
+    </td>
+    <td><a href="/delete/{{d.video_name|urlencode}}" onclick="return confirm('Want to delete?');">del</a></td>
+</tr>
+{% endfor %}
+  </table>
+</body>
+</html>
