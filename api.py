@@ -1,10 +1,9 @@
 import os
 import glob
-import json
 import datetime
-from flask import Flask, render_template, redirect, url_for, send_from_directory
+from flask import Flask, render_template, redirect, send_from_directory
 from pathlib import Path
-from thumbnail import create_thumb, name_list
+from thumbnail import create_thumb
 
 base_path = "/media"
 thumb_path = os.path.join(base_path, ".thumb")
@@ -20,7 +19,7 @@ def _all_videos(dir_path):
     return all_files
 
 def _thumb_path(file_path, thumb_path='.thumb', img_ext='png'):
-    """ Return the thumbnail path of a given path
+    """ Return the thumbnail path of a given video path
     """
     parts = file_path.split('/')
     parts.insert(len(parts)-1, thumb_path)
@@ -44,6 +43,39 @@ def _get_all_data():
         data.append(d)
     return {'videos': data}
 
+def _get_thumbnail_status(ext='png'):
+    """ Return a list of orphaned and uncreated thumbnails
+    """
+    # get list of all vids
+    all_vids = _get_all_data()['videos']
+    vids = set([x['video_name'] for x in all_vids])
+
+    # get list of all exisitng thumbs from the file system
+    thumb_path = os.path.split(all_vids[0]['thumb_path'])[0]
+    thumbs_files = glob.glob(os.path.join(thumb_path, f"*.{ext}"))
+    thumbs = set([x.split('/')[-1].replace(f'.{ext}', '') for x in thumbs_files])
+
+    # calculate the differences
+    orphaned  = thumbs - vids # thumbs exist, but no vids
+    uncreated = vids - thumbs # vids exits, but no thumbs
+    return (list(orphaned), list(uncreated))
+
+def _create_thumbs_for(uncreated):
+    """ Generate thumbnails from a list of video base names
+    """
+    for x in uncreated:
+        fn = os.path.join(base_path, f'{x}.mp4')
+        print('creating', fn)
+        create_thumb(fn)
+
+def _cleanup_thumbs_for(orphans):
+    """ Remove thumbnails from a list of video base names
+    """
+    for x in orphans:
+        fn = os.path.join(thumb_path, f'{x}.png')
+        print('removing', fn)
+        os.remove(fn)
+
 @app.route('/')
 def list_files():
     data = _get_all_data()
@@ -61,34 +93,19 @@ def refresh_thumbs(video_path):
 
 @app.route('/delete/<video_name>')
 def delete(video_name):
-    fn = f'{base_path}{video_name}.mp4'
+    fn = os.path.join(base_path, f'{video_name}.mp4')
     os.remove(fn)
     return redirect('/')
 
 @app.route('/refresh_all_thumbs')
 def refresh_all_thumbs():
-    #thumb_path = f"{base_path}.thumb/"
-    # Get just the base names of the files
-    vids = name_list(base_path, 'mp4')
-    thumbs = name_list(thumb_path, 'png')
-
-    # find a list of orphaned thumbs and remove them
-    for o in thumbs - vids:
-        fn = f'{thumb_path}{o}.png'
-        print('removing', fn)
-        os.remove(fn)
-
-    #find a list of un-thumbed videos and create thumbnails
-    for v in vids - thumbs:
-        fn = os.path.join(base_path, f"{v}.mp4")
-        print('creating', fn)
-        create_thumb(fn)
-
+    orphans, uncreated = _get_thumbnail_status()
+    _cleanup_thumbs_for(orphans)
+    _create_thumbs_for(uncreated)
     return redirect('/')
 
 @app.route('/media/<path:path>')
 def send_media(path):
-    print(path)
     return send_from_directory(base_path, path)
 
 if __name__ == "__main__":

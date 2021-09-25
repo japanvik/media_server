@@ -1,14 +1,5 @@
 import imageio
-import glob
-import os
 from PIL import Image
-
-def name_list(path, ext='mp4'):
-    """ Return a list of file base names (without extensions) given a path
-    """
-    l = glob.glob(os.path.join(path, f"*.{ext}"))
-    l = [x.split('/')[-1].replace(f'.{ext}', '') for x in l]
-    return set(l)
 
 def create_thumb(video_path):
     vid = imageio.get_reader(video_path)
@@ -24,4 +15,3 @@ def create_thumb(video_path):
     #save the image
     im.save(im_path)
     return im_path
-
