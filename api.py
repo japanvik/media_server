@@ -20,7 +20,7 @@ def _all_videos(dir_path):
     return all_files
 
 def _thumb_path(file_path, thumb_path='.thumb', img_ext='png'):
-    """ Return the thumbnail path of the given file
+    """ Return the thumbnail path of a given path
     """
     parts = file_path.split('/')
     parts.insert(len(parts)-1, thumb_path)
@@ -28,6 +28,8 @@ def _thumb_path(file_path, thumb_path='.thumb', img_ext='png'):
     return '/'.join(parts)
 
 def _get_all_data():
+    """ Return the full list of video files
+    """
     data = []
     all_vids = _all_videos(base_path)
     all_vids.sort(key=lambda x:x[1], reverse=True)
@@ -51,7 +53,6 @@ def list_files():
 @app.route('/list')
 def list_files_api():
     data = _get_all_data()
-    #return json.dumps(data)
     return data
 
 @app.route('/refresh_thumbs/<video_path>')
