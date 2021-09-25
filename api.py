@@ -104,7 +104,7 @@ def refresh_all_thumbs():
     _create_thumbs_for(uncreated)
     return redirect('/')
 
-@app.route('/media/<path:path>')
+@app.route(f'{base_path}/<path:path>')
 def send_media(path):
     return send_from_directory(base_path, path)
 
